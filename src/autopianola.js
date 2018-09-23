@@ -266,18 +266,38 @@ Synth.note = (hertz, sustain, duration, time) => {
   Synth.play(hertz, attack, decay, sustain, hold, release, time);
 };
 
-Synth._playing = false;
 Synth._time = 0;
+Synth._tick = 0;
 Synth.tempo = 240; // quarter notes per minute
 Synth.measure = [];
 
+Synth.rules = [
+  // 'rhythm',
+  // 'emphasis',
+  // 'palette',
+];
+
 Synth.schedule = () => {
   const $ = window.jQuery;
-  const notes = Scale.notes('C4', 'ahava-raba');
 
-  while (Synth._time < Audio.now() + (1/8)) {
+  let notes = ['C4'];
+  if (Synth.rules.includes('palette')) {
+    notes = Scale.notes('C4', 'ahava-raba');
+  }
+
+  while (Synth._time < Audio.now() + (1/16)) {
     const duration = 1/4;
-    const sustain = 1/2;
+    let sustain = 1/2;
+
+    if (Synth.rules.includes('emphasis')) {
+      if (Synth._tick === 0) {
+        sustain = 1;
+      }
+
+      if (Synth._tick === 2) {
+        sustain = 3/4;
+      }
+    }
 
     const note = D6.pick(notes);
     const hertz = Note.frequency(note);
@@ -286,6 +306,7 @@ Synth.schedule = () => {
     Synth._time += (60 / Synth.tempo);
 
     Synth.measure = Synth.measure.concat(note).slice(-4);
+    Synth._tick = (Synth._tick + 1) % 4;
   }
 
   let html = '';
@@ -294,7 +315,7 @@ Synth.schedule = () => {
   });
   $('#measure').html(html);
 
-  if (Synth._playing) {
+  if (Synth._playing && Synth.rules.includes('rhythm')) {
     requestAnimationFrame(Synth.schedule);
   }
 };
