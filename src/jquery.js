@@ -49,6 +49,14 @@
     return this;
   };
 
+  Fn.prototype.html = function html(value) {
+    if (this.element) {
+      this.element.innerHTML = value;
+    }
+
+    return this;
+  };
+
   Fn.prototype.click = function click(start, end) {
     const that = this;
 

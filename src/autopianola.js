@@ -1,5 +1,4 @@
 import './autopianola.scss';
-
 import './jquery.js';
 
 if (!Math.clamp) {
@@ -270,8 +269,10 @@ Synth.note = (hertz, sustain, duration, time) => {
 Synth._playing = false;
 Synth._time = 0;
 Synth.tempo = 240; // quarter notes per minute
+Synth.measure = [];
 
 Synth.schedule = () => {
+  const $ = window.jQuery;
   const notes = Scale.notes('C4', 'ahava-raba');
 
   while (Synth._time < Audio.now() + (1/8)) {
@@ -283,7 +284,15 @@ Synth.schedule = () => {
 
     Synth.note(hertz, duration, sustain, Synth._time);
     Synth._time += (60 / Synth.tempo);
+
+    Synth.measure = Synth.measure.concat(note).slice(-4);
   }
+
+  let html = '';
+  Synth.measure.forEach((note) => {
+    html += `<div>${note}</div>`;
+  });
+  $('#measure').html(html);
 
   if (Synth._playing) {
     requestAnimationFrame(Synth.schedule);

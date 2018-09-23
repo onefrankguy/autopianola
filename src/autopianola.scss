@@ -14,6 +14,10 @@ html {
   font-size: 62.5%;
 }
 
+body {
+  font-size: 1.6rem;
+}
+
 /* WORLD */
 .world {
   position: relative;
@@ -36,6 +40,20 @@ html {
 
 .pause {
   background: url('pause-button.svg');
+}
+
+/* MEASURE */
+.measure {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+}
+
+.measure > div {
+  display: inline-grid;
+  justify-items: center;
+  align-items: center;
+  width: $button-size;
+  height: $button-size;
 }
 
 /* SCREEN */
