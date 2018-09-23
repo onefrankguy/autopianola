@@ -1,0 +1,46 @@
+$button-size: 4.8rem;
+
+/* RESET */
+* {
+  cursor: default;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  font-family: Verdana, Geneva, sans-serif;
+  font-weight: normal;
+  font-size: 62.5%;
+}
+
+/* WORLD */
+.world {
+  position: relative;
+  /* Usable area on an iPhone 4 is 320x372 pixels */
+  width: 32rem;
+  margin: 0 auto;
+  overflow: hidden;
+}
+
+/* CONTROLS */
+.button {
+  display: block;
+  width: $button-size;
+  height: $button-size;
+}
+
+.play {
+  background: url('play-button.svg');
+}
+
+.pause {
+  background: url('pause-button.svg');
+}
+
+/* SCREEN */
+@media only screen and (min-width:40em) {
+  html {
+    font-size: 100%;
+  }
+}

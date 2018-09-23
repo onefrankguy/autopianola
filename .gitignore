@@ -1,3 +1,6 @@
 /package-lock.json
 /node_modules
+/dist/*.js
+/dist/*.css
+/dist/*.svg
 .DS_Store
