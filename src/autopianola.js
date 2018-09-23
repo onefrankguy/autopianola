@@ -325,19 +325,23 @@ Synth.schedule = () => {
   $('#measure').html(html);
 
   if (Synth._playing && Synth.rules.includes('rhythm')) {
-    requestAnimationFrame(Synth.schedule);
+    Synth._raf = requestAnimationFrame(Synth.schedule);
   }
 };
 
 Synth.on = () => {
-  if (!Synth._playing) {
-    Synth._playing = true;
-    requestAnimationFrame(Synth.schedule);
+  Synth._playing = true;
+  if (Synth._raf === undefined) {
+    Synth._raf = requestAnimationFrame(Synth.schedule);
   }
 };
 
 Synth.off = () => {
   Synth._playing = false;
+  if (Synth._raf !== undefined) {
+    cancelAnimationFrame(Synth._raf);
+    Synth._raf = undefined;
+  }
 };
 
 const Renderer = {};
