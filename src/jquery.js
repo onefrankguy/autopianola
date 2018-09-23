@@ -15,6 +15,14 @@
     return this;
   }
 
+  Fn.prototype.hasClass = function toggleClass(klass) {
+    if (this.element && this.element.classList) {
+      return this.element.classList.contains(klass);
+    }
+
+    return false;
+  };
+
   Fn.prototype.toggleClass = function toggleClass(klass) {
     if (this.element && this.element.classList) {
       this.element.classList.toggle(klass);
