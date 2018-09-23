@@ -373,6 +373,7 @@ window.onload = () => {
   const $ = window.jQuery;
 
   $('#play').click(() => {
+    Synth.play(Note.frequency('C0'), 1/32, 1/8, 0, 1/8, 0, Audio.now());
     controls.playing = !controls.playing;
     Renderer.invalidate(controls);
   });
