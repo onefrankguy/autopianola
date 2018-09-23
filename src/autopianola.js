@@ -6,6 +6,13 @@ if (!Math.clamp) {
   Math.clamp = (value, min, max) => Math.min(Math.max(min, value), max);
 }
 
+const D6 = {};
+
+D6.pick = (list) => {
+  const index = Math.floor(Math.random() * list.length);
+  return list[index];
+};
+
 const Audio = {};
 
 Audio.ctx = () => {
@@ -260,6 +267,38 @@ Synth.note = (hertz, sustain, duration, time) => {
   Synth.play(hertz, attack, decay, sustain, hold, release, time);
 };
 
+Synth._playing = false;
+Synth._time = 0;
+Synth.tempo = 240; // quarter notes per minute
+
+Synth.schedule = () => {
+  const notes = Scale.notes('C4', 'ahava-raba');
+
+  while (Synth._time < Audio.now() + (1/8)) {
+    const duration = 1/4;
+    const sustain = 1/2;
+
+    const note = D6.pick(notes);
+    const hertz = Note.frequency(note);
+
+    Synth.note(hertz, duration, sustain, Synth._time);
+    Synth._time += (60 / Synth.tempo);
+  }
+
+  if (Synth._playing) {
+    requestAnimationFrame(Synth.schedule);
+  }
+};
+
+Synth.on = () => {
+  Synth._playing = true;
+  requestAnimationFrame(Synth.schedule);
+};
+
+Synth.off = () => {
+  Synth._playing = false;
+};
+
 const Renderer = {};
 
 Renderer.render = (controls) => {
@@ -268,17 +307,12 @@ Renderer.render = (controls) => {
 
   if (controls.playing) {
     Audio.on();
+    Synth.on();
     play.addClass('pause');
     play.removeClass('play');
-
-    let t = Audio.now();
-    Scale.notes('C4', 'ahava-raba').forEach((note) => {
-      const hertz = Note.frequency(note);
-      Synth.note(hertz, 1/2, 1/4, t);
-      t += (1/4);
-    });
   } else {
     Audio.off();
+    Synth.off();
     play.addClass('play');
     play.removeClass('pause');
   }
