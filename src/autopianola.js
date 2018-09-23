@@ -99,6 +99,75 @@ Note.frequency = (note) => {
   return Note.semitone(16.35, steps);
 };
 
+const Synth = {};
+
+Synth.MIN_ATTACK = 0.001;
+Synth.MAX_ATTACK = 20;
+Synth.MIN_DECAY = 0.001;
+Synth.MAX_DECAY = 60;
+Synth.MIN_RELEASE = 0.001;
+Synth.MAX_RELEASE = 60;
+
+Synth.play = (hertz, attack, decay, sustain, hold, release, time) => {
+  const osc = Audio.oscillator(hertz, 'sine');
+  const gain = Audio.gain();
+
+  osc.connect(gain);
+  gain.connect(Audio.output());
+
+  const a = Math.clamp(attack, Synth.MIN_ATTACK, Synth.MAX_ATTACK);
+  const d = Math.clamp(decay, Synth.MIN_DECAY, Synth.MAX_DECAY);
+  const s = Math.clamp(sustain, Audio.MIN_GAIN, Audio.MAX_GAIN);
+  const h = Math.abs(hold);
+  const r = Math.clamp(release, Synth.MIN_RELEASE, Synth.MAX_RELEASE);
+  const t = Math.abs(time);
+
+  // Attack
+  gain.gain.exponentialRampToValueAtTime(Audio.MAX_GAIN, t + a);
+
+  // Decay
+  gain.gain.exponentialRampToValueAtTime(s, t + a + d);
+
+  // Sustain
+  // gain.gain.exponentialRampToValueAtTime(s, t + a + d + h);
+
+  // Release
+  gain.gain.exponentialRampToValueAtTime(Audio.MIN_GAIN, t + a + d + h + r);
+
+  // Play
+  osc.start(t);
+  osc.stop(t + a + d + h + r);
+};
+
+Synth.note = (hertz, duration, sustain, time) => {
+  // Flute
+  let attack = duration * (1/8);
+  let decay = duration * (1/8);
+  // let sustain = 3/4;
+  let release = duration * (1/8);
+
+  // Strings
+  // attack = duration * (1/16);
+  // decay = 0;
+  // sustain = 1;
+  // release = duration * (1/32);
+
+  // Piano
+  attack = duration * (1/32);
+  decay = duration * (1/2);
+  // sustain = 1/2;
+  release = duration * (1/2);
+
+  // Percussive
+  // attack = duration * (1/32);
+  // decay = duration * (1/8);
+  // sustain = 0;
+  // release = 0;
+
+  const hold = duration - attack - decay - release;
+  Synth.play(hertz, attack, decay, sustain, hold, release, time);
+};
+
 const Renderer = {};
 
 Renderer.render = (controls) => {
@@ -109,6 +178,7 @@ Renderer.render = (controls) => {
     Audio.on();
     play.addClass('pause');
     play.removeClass('play');
+    Synth.note(Note.frequency('C4'), 1/4, 1/4, Audio.now());
   } else {
     Audio.off();
     play.addClass('play');
