@@ -302,10 +302,6 @@ Synth.schedule = () => {
       if (Synth._tick === 2) {
         sustain = 3/4;
       }
-
-      if (!Synth.rules.includes('rhythm')) {
-        break;
-      }
     }
 
     const note = D6.pick(notes);
@@ -316,6 +312,10 @@ Synth.schedule = () => {
 
     Synth.measure = Synth.measure.concat(note).slice(-4);
     Synth._tick = (Synth._tick + 1) % 4;
+
+    if (!Synth.rules.includes('rhythm')) {
+      break;
+    }
   }
 
   let html = '';
