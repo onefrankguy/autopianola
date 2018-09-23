@@ -1,0 +1,5 @@
+autopianola.css
+autopianola.js
+index.html
+pause-button.svg
+play-button.svg
