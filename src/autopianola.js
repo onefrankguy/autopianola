@@ -73,6 +73,32 @@ Audio.oscillator = (hertz, type) => {
   return osc;
 };
 
+const Note = {};
+
+Note.semitone = (hertz, steps) => Math.round((hertz * (2 ** (steps / 12))) * 100) / 100;
+
+Note.frequency = (note) => {
+  const sharps = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+  const flats = ['C', 'Db', 'D', 'Eb', 'E', 'F', 'Gb', 'G', 'Ab', 'A', 'Bb', 'B'];
+
+  const name = note.slice(0, 1).toUpperCase();
+  let index = sharps.indexOf(name);
+
+  const adjust = note.slice(1, 2).toLowerCase();
+  if (adjust === '#') {
+    index = sharps.indexOf(name + adjust);
+  }
+  if (adjust === 'b') {
+    index = flats.indexOf(name + adjust);
+  }
+
+  const octave = parseInt(note.slice(-1), 10);
+  const steps = (octave * 12) + index;
+
+  // C0 is 16.35 Hz
+  return Note.semitone(16.35, steps);
+};
+
 window.onload = () => {
   const $ = window.jQuery;
   $('#play').click((e) => {
