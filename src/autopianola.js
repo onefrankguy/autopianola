@@ -99,6 +99,98 @@ Note.frequency = (note) => {
   return Note.semitone(16.35, steps);
 };
 
+const Scale = {};
+
+Scale.notes = (root, type) => {
+  const sharps = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+  const flats = ['C', 'Db', 'D', 'Eb', 'E', 'F', 'Gb', 'G', 'Ab', 'A', 'Bb', 'B'];
+
+  const name = root.slice(0, 1).toUpperCase();
+  let index = sharps.indexOf(name);
+
+  const adjust = root.slice(1, 2).toLowerCase();
+  if (adjust === '#') {
+    index = sharps.indexOf(name + adjust);
+  }
+  if (adjust === 'b') {
+    index = flats.indexOf(name + adjust);
+  }
+
+  // Chromatic - random, atonal
+  let intervals = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1];
+
+  // Major - classic, happy
+  if (type === 'major') {
+    intervals = [2, 2, 1, 2, 2, 2, 1];
+  }
+
+  // Harmonic Minor - hunting, creepy
+  if (type === 'harmonic-minor') {
+    intervals = [2, 1, 2, 2, 1, 3, 1];
+  }
+
+  // Minor Pentatonic - blues, rock
+  if (type === 'minor-pentatonic') {
+    intervals = [3, 2, 2, 3, 2];
+  }
+
+  // Natural Minor - scary, epic
+  if (type === 'natural-minor') {
+    intervals = [2, 1, 2, 2, 1, 2, 2];
+  }
+
+  // Melodic Minor Up - wistful, mysterious
+  if (type === 'melodic-minor-up') {
+    intervals = [2, 1, 2, 2, 2, 2, 1];
+  }
+
+  // Melodic Minor Down = sombre, soulful
+  if (type === 'melodic-minor-down') {
+    intervals = [2, 2, 1, 2, 2, 1, 2];
+  }
+
+  // Dorian - cool, jazzy
+  if (type === 'dorian') {
+    intervals = [2, 1, 2, 2, 2, 1, 2];
+  }
+
+  // Mixolydian - progressive, complex
+  if (type === 'mixolydian') {
+    intervals = [2, 2, 1, 2, 2, 1, 2];
+  }
+
+  // Ahava Raba - exotic, unfamiliar
+  if (type === 'ahava-raba') {
+    intervals = [1, 3, 1, 2, 1, 2, 2];
+  }
+
+  // Major Pentatonic - country, gleeful
+  if (type === 'major-pentatonic') {
+    intervals = [2, 2, 3, 2, 3];
+  }
+
+  // Diatonic - bizarre, symmetrical
+  if (type === 'diatonic') {
+    intervals = [2, 2, 2, 2, 2, 2];
+  }
+
+  let octave = parseInt(root.slice(-1), 10);
+
+  const notes = [];
+  notes.push(`${sharps[index]}${octave}`);
+
+  intervals.forEach((step) => {
+    index += step;
+    if (index >= sharps.length) {
+      index %= sharps.length;
+      octave += 1;
+    }
+    notes.push(`${sharps[index]}${octave}`);
+  });
+
+  return notes;
+};
+
 const Synth = {};
 
 Synth.MIN_ATTACK = 0.001;
@@ -139,7 +231,7 @@ Synth.play = (hertz, attack, decay, sustain, hold, release, time) => {
   osc.stop(t + a + d + h + r);
 };
 
-Synth.note = (hertz, duration, sustain, time) => {
+Synth.note = (hertz, sustain, duration, time) => {
   // Flute
   let attack = duration * (1/8);
   let decay = duration * (1/8);
@@ -178,7 +270,13 @@ Renderer.render = (controls) => {
     Audio.on();
     play.addClass('pause');
     play.removeClass('play');
-    Synth.note(Note.frequency('C4'), 1/4, 1/4, Audio.now());
+
+    let t = Audio.now();
+    Scale.notes('C4', 'ahava-raba').forEach((note) => {
+      const hertz = Note.frequency(note);
+      Synth.note(hertz, 1/2, 1/4, t);
+      t += (1/4);
+    });
   } else {
     Audio.off();
     play.addClass('play');
