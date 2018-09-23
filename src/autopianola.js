@@ -272,9 +272,9 @@ Synth.tempo = 240; // quarter notes per minute
 Synth.measure = [];
 
 Synth.rules = [
-  // 'rhythm',
-  // 'emphasis',
-  // 'palette',
+  'rhythm',
+  'emphasis',
+  'palette',
 ];
 
 Synth.schedule = () => {
@@ -285,7 +285,12 @@ Synth.schedule = () => {
     notes = Scale.notes('C4', 'ahava-raba');
   }
 
-  while (Synth._time < Audio.now() + (1/16)) {
+  const now = Audio.now();
+  if (Math.abs(now - Synth._time) > 1) {
+    Synth._time = now;
+  }
+
+  while (Synth._time < Audio.now() + (1/8)) {
     const duration = 1/4;
     let sustain = 1/2;
 
@@ -296,6 +301,10 @@ Synth.schedule = () => {
 
       if (Synth._tick === 2) {
         sustain = 3/4;
+      }
+
+      if (!Synth.rules.includes('rhythm')) {
+        break;
       }
     }
 
