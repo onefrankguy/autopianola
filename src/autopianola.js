@@ -300,8 +300,10 @@ Synth.schedule = () => {
 };
 
 Synth.on = () => {
-  Synth._playing = true;
-  requestAnimationFrame(Synth.schedule);
+  if (!Synth._playing) {
+    Synth._playing = true;
+    requestAnimationFrame(Synth.schedule);
+  }
 };
 
 Synth.off = () => {
@@ -315,12 +317,10 @@ Renderer.render = (controls) => {
   const play = $('#play');
 
   if (controls.playing) {
-    Audio.on();
     Synth.on();
     play.addClass('pause');
     play.removeClass('play');
   } else {
-    Audio.off();
     Synth.off();
     play.addClass('play');
     play.removeClass('pause');
