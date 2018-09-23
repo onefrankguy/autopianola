@@ -99,15 +99,36 @@ Note.frequency = (note) => {
   return Note.semitone(16.35, steps);
 };
 
-window.onload = () => {
+const Renderer = {};
+
+Renderer.render = (controls) => {
   const $ = window.jQuery;
-  $('#play').click((e) => {
-    if (e.hasClss('play')) {
-      Audio.on();
-    } else {
-      Audio.off();
-    }
-    e.toggleClass('play');
-    e.toggleClass('pause');
+  const play = $('#play');
+
+  if (controls.playing) {
+    Audio.on();
+    play.addClass('pause');
+    play.removeClass('play');
+  } else {
+    Audio.off();
+    play.addClass('play');
+    play.removeClass('pause');
+  }
+};
+
+Renderer.invalidate = (controls) => {
+  requestAnimationFrame(() => Renderer.render(controls));
+};
+
+window.onload = () => {
+  const controls = {
+    playing: false
+  };
+
+  const $ = window.jQuery;
+
+  $('#play').click(() => {
+    controls.playing = !controls.playing;
+    Renderer.invalidate(controls);
   });
 };

@@ -15,12 +15,30 @@
     return this;
   }
 
-  Fn.prototype.hasClass = function toggleClass(klass) {
-    if (this.element && this.element.classList) {
+  Fn.prototype.hasClass = function hasClass(klass) {
+    if (this.element && this.element.classList && klass) {
       return this.element.classList.contains(klass);
     }
 
     return false;
+  };
+
+  Fn.prototype.addClass = function addClass(klass) {
+    if (this.element && this.element.classList && klass) {
+      const klasses = klass.split(' ').filter(k => k);
+      klasses.forEach(k => this.element.classList.add(k));
+    }
+
+    return this;
+  };
+
+  Fn.prototype.removeClass = function removeClass(klass) {
+    if (this.element && this.element.classList) {
+      const klasses = klass.split(' ').filter(k => k);
+      klasses.forEach(k => this.element.classList.remove(k));
+    }
+
+    return this;
   };
 
   Fn.prototype.toggleClass = function toggleClass(klass) {
