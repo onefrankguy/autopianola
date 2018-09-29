@@ -422,7 +422,7 @@ Synth.schedule = () => {
 
     measure = D6.shuffle(measure);
 
-    const loops = 4;
+    const loops = D6.pick([4, 6, 8]);
     for (let i = 0; i < loops; i += 1) {
       Synth._song = Synth._song.concat(measure);
     }
