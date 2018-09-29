@@ -1,5 +1,6 @@
 import './autopianola.scss';
 import './jquery.js';
+import mml from './mml.js';
 
 if (!Math.clamp) {
   Math.clamp = (value, min, max) => Math.min(Math.max(min, value), max);
@@ -268,13 +269,15 @@ Synth.note = (hertz, sustain, duration, time) => {
 
 Synth._time = 0;
 Synth._tick = 0;
-Synth.tempo = 240; // quarter notes per minute
+Synth._song = [];
+Synth.tempo = 120; // quarter notes per minute
 Synth.measure = [];
 
 Synth.rules = [
   'rhythm',
   'emphasis',
   'palette',
+  'song',
 ];
 
 Synth.schedule = () => {
@@ -285,13 +288,19 @@ Synth.schedule = () => {
     notes = Scale.notes('C4', 'ahava-raba');
   }
 
+  if (Synth.rules.includes('song') && Synth._song.length <= 0) {
+    // From Act 1, Scene 9, of Handel's opera _Ottone_.
+    Synth._song = mml('T120O4L8AAR4RA>C<BGGR4RGBGEER4EE16E16F+GDDR4GD16D16FE');
+    Synth._song.reverse();
+  }
+
   const now = Audio.now();
   if (Math.abs(now - Synth._time) > 1) {
     Synth._time = now;
   }
 
   while (Synth._time < Audio.now() + (1/8)) {
-    const duration = 1/4;
+    let duration = 8;
     let sustain = 1/2;
 
     if (Synth.rules.includes('emphasis')) {
@@ -304,11 +313,33 @@ Synth.schedule = () => {
       }
     }
 
-    const note = D6.pick(notes);
-    const hertz = Note.frequency(note);
+    let note = D6.pick(notes);
 
-    Synth.note(hertz, duration, sustain, Synth._time);
-    Synth._time += (60 / Synth.tempo);
+    if (Synth.rules.includes('song')) {
+      const data = Synth._song.pop();
+      if (data !== undefined) {
+        [note, duration] = data.split(':');
+      }
+    }
+
+    if (note === 'T') {
+      Synth.tempo = duration;
+      continue;
+    }
+
+    // Tempo is in quarter notes per minute and there are sixty seconds in a minute.
+    // So the length of a quarter note in seconds is `60 / tempo`.
+    // `duration` is in parts of a whole note and there are four quarter notes in a whole note.
+    // So the length of this note is `duration * 4 * (60 / tempo)`.
+    duration = 1 / parseInt(duration, 10);
+    duration = duration * 4 * (60 / Synth.tempo);
+
+    if (note !== 'R') {
+      const hertz = Note.frequency(note);
+      Synth.note(hertz, duration, sustain, Synth._time);
+    }
+
+    Synth._time += duration;
 
     Synth.measure = Synth.measure.concat(note).slice(-4);
     Synth._tick = (Synth._tick + 1) % 4;
