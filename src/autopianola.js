@@ -13,6 +13,24 @@ D6.pick = (list) => {
   return list[index];
 };
 
+D6.shuffle = (list) => {
+  const array = list.slice();
+
+  let m = array.length;
+  let t;
+  let i;
+
+  while (m > 0) {
+    i = Math.floor(Math.random() * m);
+    m -= 1;
+    t = array[m];
+    array[m] = array[i];
+    array[i] = t;
+  }
+
+  return array;
+};
+
 const Audio = {};
 
 Audio.ctx = () => {
@@ -315,6 +333,9 @@ Synth.rules = [
   'emphasis',
   'palette',
   'interpolate',
+  'groups',
+  'dynamics',
+  'spaces',
   // 'song',
 ];
 
@@ -328,27 +349,83 @@ Synth.schedule = () => {
   }
 
   if (Synth.rules.includes('interpolate')) {
-    const [last] = Synth.measure.slice(-1);
-    if (last !== undefined) {
-      const lower = Scale.notes('C4', 'ahava-raba', 'down').slice(1).reverse();
-      const upper = Scale.notes('C4', 'ahava-raba', 'up');
-      notes = [].concat(lower, upper);
+    const lower = Scale.notes('C4', 'ahava-raba', 'down').slice(1).reverse();
+    const upper = Scale.notes('C4', 'ahava-raba', 'up');
+    notes = [].concat(lower, upper);
 
-      const length = 7;
-      const step = Math.floor(length / 2);
-      let index = notes.indexOf(last) - step;
-      while (index + length >= notes.length) {
-        index -= 1;
-      }
-      index = Math.clamp(index, 0, notes.length - 1);
-      notes = notes.slice(index, index + length);
+    let last = Synth.measure.slice().reverse().find((n) => n !== 'R');
+    if (last === undefined) {
+      last = 'C4';
     }
+
+    const length = 7;
+    const step = Math.floor(length / 2);
+    let index = notes.indexOf(last) - step;
+    while (index + length >= notes.length) {
+      index -= 1;
+    }
+    index = Math.clamp(index, 0, notes.length - 1);
+    notes = notes.slice(index, index + length);
   }
 
   if (Synth.rules.includes('song') && Synth._song.length <= 0) {
     // From Act 1, Scene 9, of Handel's opera _Ottone_.
     Synth._song = mml('T120O4L8AAR4RA>C<BGGR4RGBGEER4EE16E16F+GDDR4GD16D16FE');
     Synth._song.reverse();
+  }
+
+  if (Synth.rules.includes('groups') && Synth._song.length <= 0) {
+    const measures = 4;
+    let measure = [];
+    let length = 0;
+    let rests = 0;
+
+    while (length < measures) {
+      let action = 'skip';
+
+      if (Synth.rules.includes('dynamics')) {
+        action = D6.pick(['skip', 'combine', 'split']);
+      }
+
+      let duration = 4;
+
+      if (action === 'combine') {
+        if (length + (duration / 2) <= measures) {
+          duration /= 2;
+        }
+      }
+
+      let ticks = 1;
+
+      if (action === 'split') {
+        duration *= 2;
+        ticks = 2;
+      }
+
+      for (let i = 0; i < ticks; i += 1) {
+        let note = D6.pick(notes);
+
+        if (Synth.rules.includes('spaces') && D6.pick([0, 1]) === 1) {
+          if (rests + (1 / duration) <= measures * 0.3125) {
+            note = 'R';
+          }
+        }
+
+        measure.push(`${note}:${duration}`);
+        length += 1 / duration;
+
+        if (note === 'R') {
+          rests += 1 / duration;
+        }
+      }
+    }
+
+    measure = D6.shuffle(measure);
+
+    const loops = 4;
+    for (let i = 0; i < loops; i += 1) {
+      Synth._song = Synth._song.concat(measure);
+    }
   }
 
   const now = Audio.now();
@@ -372,12 +449,10 @@ Synth.schedule = () => {
 
     let note = D6.pick(notes);
 
-    if (Synth.rules.includes('song')) {
+    if (Synth._song.length > 0) {
       const data = Synth._song.pop();
-      if (data !== undefined) {
-        [note, duration] = data.split(':');
-        duration = parseInt(duration, 10);
-      }
+      [note, duration] = data.split(':');
+      duration = parseInt(duration, 10);
     }
 
     if (note === 'T') {
