@@ -270,7 +270,7 @@ Synth.note = (hertz, sustain, duration, time) => {
 Synth._time = 0;
 Synth._tick = 0;
 Synth._song = [];
-Synth.tempo = 120; // quarter notes per minute
+Synth.tempo = 240; // quarter notes per minute
 Synth.measure = [];
 
 Synth.rules = [
@@ -300,7 +300,7 @@ Synth.schedule = () => {
   }
 
   while (Synth._time < Audio.now() + (1/8)) {
-    let duration = 8;
+    let duration = 4;
     let sustain = 1/2;
 
     if (Synth.rules.includes('emphasis')) {
@@ -319,6 +319,7 @@ Synth.schedule = () => {
       const data = Synth._song.pop();
       if (data !== undefined) {
         [note, duration] = data.split(':');
+        duration = parseInt(duration, 10);
       }
     }
 
@@ -327,12 +328,12 @@ Synth.schedule = () => {
       continue;
     }
 
-    // Tempo is in quarter notes per minute and there are sixty seconds in a minute.
-    // So the length of a quarter note in seconds is `60 / tempo`.
-    // `duration` is in parts of a whole note and there are four quarter notes in a whole note.
-    // So the length of this note is `duration * 4 * (60 / tempo)`.
-    duration = 1 / parseInt(duration, 10);
-    duration = duration * 4 * (60 / Synth.tempo);
+    // Tempo is in quarter notes per minute and there are sixty seconds in a
+    // minute. So the length of a quarter note in seconds is `60 / tempo`.
+    // `duration` is 1 for a whole note, 2 for a half, 4 for a quarter, etc.
+    // There are four quarter notes in a whole note, so the length of this note
+    // is `(4 / duration) * (60 / tempo)`.
+    duration = (4 / duration) * (60 / Synth.tempo);
 
     if (note !== 'R') {
       const hertz = Note.frequency(note);
