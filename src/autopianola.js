@@ -108,7 +108,47 @@ Note.frequency = (note) => {
 
 const Scale = {};
 
-Scale.notes = (root, type) => {
+Scale.up = (intervals, index, octave) => {
+  const sharps = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+
+  let notes = [];
+
+  notes.push(`${sharps[index]}${octave}`);
+
+  intervals.forEach((step) => {
+    index += step;
+    while (index >= sharps.length) {
+      index -= sharps.length;
+      octave += 1;
+    }
+    octave = Math.clamp(octave, 1, 8);
+    notes.push(`${sharps[index]}${octave}`);
+  });
+
+  return notes;
+};
+
+Scale.down = (intervals, index, octave) => {
+  const sharps = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+
+  let notes = [];
+
+  notes.push(`${sharps[index]}${octave}`);
+
+  intervals.slice().reverse().forEach((step) => {
+    index -= step;
+    while (index < 0) {
+      index += sharps.length;
+      octave -= 1;
+    }
+    octave = Math.clamp(octave, 1, 8);
+    notes.push(`${sharps[index]}${octave}`);
+  });
+
+  return notes;
+};
+
+Scale.notes = (root, type, direction) => {
   const sharps = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
   const flats = ['C', 'Db', 'D', 'Eb', 'E', 'F', 'Gb', 'G', 'Ab', 'A', 'Bb', 'B'];
 
@@ -181,19 +221,16 @@ Scale.notes = (root, type) => {
     intervals = [2, 2, 2, 2, 2, 2];
   }
 
-  let octave = parseInt(root.slice(-1), 10);
+  const octave = parseInt(root.slice(-1), 10);
+  let notes = [];
 
-  const notes = [];
-  notes.push(`${sharps[index]}${octave}`);
+  if (direction === 'up') {
+    notes = Scale.up(intervals, index, octave);
+  }
 
-  intervals.forEach((step) => {
-    index += step;
-    if (index >= sharps.length) {
-      index %= sharps.length;
-      octave += 1;
-    }
-    notes.push(`${sharps[index]}${octave}`);
-  });
+  if (direction === 'down') {
+    notes = Scale.down(intervals, index, octave);
+  }
 
   return notes;
 };
@@ -277,15 +314,35 @@ Synth.rules = [
   'rhythm',
   'emphasis',
   'palette',
-  'song',
+  'interpolate',
+  // 'song',
 ];
 
 Synth.schedule = () => {
   const $ = window.jQuery;
 
   let notes = ['C4'];
+
   if (Synth.rules.includes('palette')) {
-    notes = Scale.notes('C4', 'ahava-raba');
+    notes = Scale.notes('C4', 'ahava-raba', 'up');
+  }
+
+  if (Synth.rules.includes('interpolate')) {
+    const [last] = Synth.measure.slice(-1);
+    if (last !== undefined) {
+      const lower = Scale.notes('C4', 'ahava-raba', 'down').slice(1).reverse();
+      const upper = Scale.notes('C4', 'ahava-raba', 'up');
+      notes = [].concat(lower, upper);
+
+      const length = 7;
+      const step = Math.floor(length / 2);
+      let index = notes.indexOf(last) - step;
+      while (index + length >= notes.length) {
+        index -= 1;
+      }
+      index = Math.clamp(index, 0, notes.length - 1);
+      notes = notes.slice(index, index + length);
+    }
   }
 
   if (Synth.rules.includes('song') && Synth._song.length <= 0) {
