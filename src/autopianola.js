@@ -294,18 +294,21 @@ Synth.play = (hertz, attack, decay, sustain, hold, release, time) => {
   osc.stop(t + a + d + h + r);
 };
 
-Synth.note = (hertz, sustain, duration, time) => {
-  // Flute
-  let attack = duration * (1/8);
-  let decay = duration * (1/8);
-  // let sustain = 3/4;
-  let release = duration * (1/8);
+Synth.flute = (hertz, sustain, duration, time) => {
+  const attack = duration * (1/8);
+  const decay = duration * (1/8);
+  // sustain = 3/4;
+  const release = duration * (1/8);
 
-  // Strings
-  // attack = duration * (1/16);
-  // decay = 0;
+  const hold = duration - attack - decay - release;
+  Synth.play(hertz, attack, decay, sustain, hold, release, time);
+};
+
+Synth.strings = (hertz, sustain, duration, time) => {
+  const attack = duration * (1/16);
+  const decay = 0;
   // sustain = 1;
-  // release = duration * (1/32);
+  const release = duration * (1/32);
 
   const hold = duration - attack - decay - release;
   Synth.play(hertz, attack, decay, sustain, hold, release, time);
@@ -314,6 +317,7 @@ Synth.note = (hertz, sustain, duration, time) => {
 Synth.piano = (hertz, sustain, duration, time) => {
   const attack = duration * (1/32);
   const decay = duration * (1/2);
+  // sustain = 1/2;
   const release = duration * (1/2);
 
   const hold = duration - attack - decay - release;
@@ -323,6 +327,7 @@ Synth.piano = (hertz, sustain, duration, time) => {
 Synth.percussion = (hertz, sustain, duration, time) => {
   const attack = duration * (1/32);
   const decay = duration * (1/8);
+  // sustain = 0;
   const release = 0;
 
   const hold = duration - attack - decay - release;
@@ -330,6 +335,7 @@ Synth.percussion = (hertz, sustain, duration, time) => {
 };
 
 Synth._time = 0;
+Synth._beat = 0;
 Synth._tick = 0;
 Synth._song = [];
 Synth.tempo = 240; // quarter notes per minute
@@ -339,12 +345,13 @@ Synth.scale = 'ahava-raba';
 
 Synth.rules = [
   'rhythm',
-  // 'emphasis',
+  'emphasis',
   'palette',
   'interpolate',
   'groups',
   'dynamics',
   'spaces',
+  'bass',
   // 'song',
 ];
 
@@ -450,11 +457,36 @@ Synth.schedule = () => {
   }
 
   const now = Audio.now();
+  const lookahead = 1/10;
+
+  if (Math.abs(now - Synth._beat) > 1) {
+    Synth._beat = now;
+  }
+
+  while (Synth._beat < now + lookahead) {
+    const duration = 60 / Synth.tempo;
+
+    if (Synth.rules.includes('bass')) {
+      if (Synth._tick === 0 || Synth._tick === 2) {
+        const [bass] = Scale.notes(Synth.root, Synth.style, 'down').reverse();
+        const hertz = Note.frequency(bass);
+        Synth.percussion(hertz, 0, duration, Synth._beat);
+      }
+    }
+
+    Synth._beat += duration;
+    Synth._tick = (Synth._tick + 1) % 4;
+
+    if (!Synth.rules.includes('rhythm')) {
+      break;
+    }
+  }
+
   if (Math.abs(now - Synth._time) > 1) {
     Synth._time = now;
   }
 
-  while (Synth._time < Audio.now() + (1/8)) {
+  while (Synth._time < now + lookahead) {
     let duration = 4;
     let sustain = 1/2;
 
@@ -485,7 +517,7 @@ Synth.schedule = () => {
     // minute. So the length of a quarter note in seconds is `60 / tempo`.
     // `duration` is 1 for a whole note, 2 for a half, 4 for a quarter, etc.
     // There are four quarter notes in a whole note, so the length of this note
-    // is `(4 / duration) * (60 / tempo)`.
+    // is `(4 / duration) * (60 / tempo)` seconds.
     duration = (4 / duration) * (60 / Synth.tempo);
 
     if (note !== 'R') {
@@ -496,7 +528,6 @@ Synth.schedule = () => {
     Synth._time += duration;
 
     Synth.measure = Synth.measure.concat(note).slice(-4);
-    Synth._tick = (Synth._tick + 1) % 4;
 
     if (!Synth.rules.includes('rhythm')) {
       break;
