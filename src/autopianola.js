@@ -1,6 +1,9 @@
 import './autopianola.scss';
 import './jquery.js';
 import mml from './mml.js';
+import Alea from './alea.js';
+
+const PRNG = Alea();
 
 if (!Math.clamp) {
   Math.clamp = (value, min, max) => Math.min(Math.max(min, value), max);
@@ -9,7 +12,7 @@ if (!Math.clamp) {
 const D6 = {};
 
 D6.pick = (list) => {
-  const index = Math.floor(Math.random() * list.length);
+  const index = Math.floor(PRNG.random() * list.length);
   return list[index];
 };
 
@@ -21,7 +24,7 @@ D6.shuffle = (list) => {
   let i;
 
   while (m > 0) {
-    i = Math.floor(Math.random() * m);
+    i = Math.floor(PRNG.random() * m);
     m -= 1;
     t = array[m];
     array[m] = array[i];
