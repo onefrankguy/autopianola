@@ -3,20 +3,18 @@ import './jquery.js';
 import mml from './mml.js';
 import Alea from './alea.js';
 
-const PRNG = Alea();
-
 if (!Math.clamp) {
   Math.clamp = (value, min, max) => Math.min(Math.max(min, value), max);
 }
 
-const D6 = {};
+const PRNG = Alea();
 
-D6.pick = (list) => {
+PRNG.pick = (list) => {
   const index = Math.floor(PRNG.random() * list.length);
   return list[index];
 };
 
-D6.shuffle = (list) => {
+PRNG.shuffle = (list) => {
   const array = list.slice();
 
   let m = array.length;
@@ -309,20 +307,26 @@ Synth.note = (hertz, sustain, duration, time) => {
   // sustain = 1;
   // release = duration * (1/32);
 
-  // Piano
-  attack = duration * (1/32);
-  decay = duration * (1/2);
-  // sustain = 1/2;
-  release = duration * (1/2);
+  const hold = duration - attack - decay - release;
+  Synth.play(hertz, attack, decay, sustain, hold, release, time);
+};
 
-  // Percussive
-  // attack = duration * (1/32);
-  // decay = duration * (1/8);
-  // sustain = 0;
-  // release = 0;
+Synth.piano = (hertz, sustain, duration, time) => {
+  const attack = duration * (1/32);
+  const decay = duration * (1/2);
+  const release = duration * (1/2);
 
   const hold = duration - attack - decay - release;
   Synth.play(hertz, attack, decay, sustain, hold, release, time);
+};
+
+Synth.percussion = (hertz, sustain, duration, time) => {
+  const attack = duration * (1/32);
+  const decay = duration * (1/8);
+  const release = 0;
+
+  const hold = duration - attack - decay - release;
+  Synth.play(hertz, attack, decay, 0, hold, release, time);
 };
 
 Synth._time = 0;
@@ -330,12 +334,12 @@ Synth._tick = 0;
 Synth._song = [];
 Synth.tempo = 240; // quarter notes per minute
 Synth.measure = [];
-Synth.root = 'C4';
+Synth.root = 'D4';
 Synth.scale = 'ahava-raba';
 
 Synth.rules = [
   'rhythm',
-  'emphasis',
+  // 'emphasis',
   'palette',
   'interpolate',
   'groups',
@@ -401,7 +405,7 @@ Synth.schedule = () => {
       let action = 'skip';
 
       if (Synth.rules.includes('dynamics')) {
-        action = D6.pick(['skip', 'combine', 'split']);
+        action = PRNG.pick(['skip', 'combine', 'split']);
       }
 
       let duration = 4;
@@ -420,9 +424,9 @@ Synth.schedule = () => {
       }
 
       for (let i = 0; i < ticks; i += 1) {
-        let note = D6.pick(notes);
+        let note = PRNG.pick(notes);
 
-        if (Synth.rules.includes('spaces') && D6.pick([0, 1]) === 1) {
+        if (Synth.rules.includes('spaces') && PRNG.pick([0, 1]) === 1) {
           if (rests + (1 / duration) <= measures * 0.3125) {
             note = 'R';
           }
@@ -437,9 +441,9 @@ Synth.schedule = () => {
       }
     }
 
-    measure = D6.shuffle(measure);
+    measure = PRNG.shuffle(measure);
 
-    const loops = D6.pick([4, 6, 8]);
+    const loops = PRNG.pick([4, 6, 8]);
     for (let i = 0; i < loops; i += 1) {
       Synth._song = Synth._song.concat(measure);
     }
@@ -464,7 +468,7 @@ Synth.schedule = () => {
       }
     }
 
-    let note = D6.pick(notes);
+    let note = PRNG.pick(notes);
 
     if (Synth._song.length > 0) {
       const data = Synth._song.pop();
@@ -486,7 +490,7 @@ Synth.schedule = () => {
 
     if (note !== 'R') {
       const hertz = Note.frequency(note);
-      Synth.note(hertz, duration, sustain, Synth._time);
+      Synth.piano(hertz, sustain, duration, Synth._time);
     }
 
     Synth._time += duration;
