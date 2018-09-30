@@ -327,6 +327,8 @@ Synth._tick = 0;
 Synth._song = [];
 Synth.tempo = 240; // quarter notes per minute
 Synth.measure = [];
+Synth.root = 'C4';
+Synth.scale = 'ahava-raba';
 
 Synth.rules = [
   'rhythm',
@@ -339,6 +341,34 @@ Synth.rules = [
   // 'song',
 ];
 
+// Return a scale of size `length` centered around the last note played.
+// If nothing's been played, the scale is centered around the root note.
+Synth.interpolate = (root, type, played, length) => {
+  const lower = Scale.notes(root, type, 'down').slice(1).reverse();
+  const upper = Scale.notes(root, type, 'up');
+  let notes = [].concat(lower, upper);
+
+  const [last] = played.filter(note => note !== 'R').reverse();
+  let index = notes.indexOf(last);
+  if (index < 0) {
+    index = notes.indexOf(root);
+  }
+
+  let step = Math.floor(length / 2);
+  index -= step;
+
+  if (index + length > notes.length) {
+    step = notes.length - (index + length);
+    index += step;
+  }
+
+  if (index < 0) {
+    index = 0;
+  }
+
+  return notes.slice(index, index + length);
+};
+
 Synth.schedule = () => {
   const $ = window.jQuery;
 
@@ -349,23 +379,7 @@ Synth.schedule = () => {
   }
 
   if (Synth.rules.includes('interpolate')) {
-    const lower = Scale.notes('C4', 'ahava-raba', 'down').slice(1).reverse();
-    const upper = Scale.notes('C4', 'ahava-raba', 'up');
-    notes = [].concat(lower, upper);
-
-    let last = Synth.measure.slice().reverse().find((n) => n !== 'R');
-    if (last === undefined) {
-      last = 'C4';
-    }
-
-    const length = 7;
-    const step = Math.floor(length / 2);
-    let index = notes.indexOf(last) - step;
-    while (index + length >= notes.length) {
-      index -= 1;
-    }
-    index = Math.clamp(index, 0, notes.length - 1);
-    notes = notes.slice(index, index + length);
+    notes = Synth.interpolate(Synth.root, Synth.scale, Synth.measure, 7);
   }
 
   if (Synth.rules.includes('song') && Synth._song.length <= 0) {
