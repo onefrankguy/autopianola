@@ -14,24 +14,6 @@ PRNG.pick = (list) => {
   return list[index];
 };
 
-PRNG.shuffle = (list) => {
-  const array = list.slice();
-
-  let m = array.length;
-  let t;
-  let i;
-
-  while (m > 0) {
-    i = Math.floor(PRNG.random() * m);
-    m -= 1;
-    t = array[m];
-    array[m] = array[i];
-    array[i] = t;
-  }
-
-  return array;
-};
-
 const Audio = {};
 
 Audio.ctx = () => {
@@ -447,8 +429,6 @@ Synth.schedule = () => {
         }
       }
     }
-
-    measure = PRNG.shuffle(measure);
 
     const loops = PRNG.pick([4, 6, 8]);
     for (let i = 0; i < loops; i += 1) {
