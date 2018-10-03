@@ -317,6 +317,7 @@ Synth.percussion = (hertz, sustain, duration, time) => {
 };
 
 Synth._time = 0;
+Synth._note = 0;
 Synth._beat = 0;
 Synth._tick = 0;
 Synth._song = [];
@@ -437,81 +438,83 @@ Synth.schedule = () => {
   }
 
   const now = Audio.now();
-  const lookahead = 1/10;
-
-  if (Math.abs(now - Synth._beat) > 1) {
-    Synth._beat = now;
-  }
-
-  while (Synth._beat < now + lookahead) {
-    const duration = 60 / Synth.tempo;
-
-    if (Synth.rules.includes('bass')) {
-      if (Synth._tick === 0 || Synth._tick === 2) {
-        const [bass] = Scale.notes(Synth.root, Synth.style, 'down').reverse();
-        const hertz = Note.frequency(bass);
-        Synth.percussion(hertz, 0, duration, Synth._beat);
-      }
-    }
-
-    Synth._beat += duration;
-    Synth._tick = (Synth._tick + 1) % 4;
-
-    if (!Synth.rules.includes('rhythm')) {
-      break;
-    }
-  }
+  const lookahead = 0.1;
+  const interval = 0.025;
 
   if (Math.abs(now - Synth._time) > 1) {
     Synth._time = now;
+    Synth._note = now;
+    Synth._beat = now;
+    Synth._tick = 0;
   }
 
-  while (Synth._time < now + lookahead) {
-    let duration = 4;
-    let sustain = 1/2;
+  while (Synth._time < Audio.now() + lookahead) {
+    if (Synth._beat < Synth._time + interval) {
+      const duration = 60 / Synth.tempo;
 
-    if (Synth.rules.includes('emphasis')) {
-      if (Synth._tick === 0) {
-        sustain = 1;
+      Synth._tick = (Synth._tick + 1) % 4;
+
+      if (Synth.rules.includes('bass')) {
+        if (Synth._tick === 1 || Synth._tick === 3) {
+          const [bass] = Scale.notes(Synth.root, Synth.style, 'down').reverse();
+          const hertz = Note.frequency(bass);
+          Synth.percussion(hertz, 0, duration, Synth._beat);
+        }
       }
 
-      if (Synth._tick === 2) {
-        sustain = 3/4;
+      Synth._beat += duration;
+    }
+
+    if (Synth._note < Synth._time + interval) {
+      let duration = 4;
+      let sustain = 1/2;
+
+      if (Synth.rules.includes('emphasis')) {
+        if (Synth._tick === 1) {
+          sustain = 1;
+        }
+
+        if (Synth._tick === 3) {
+          sustain = 3/4;
+        }
       }
+
+      let note = PRNG.pick(notes);
+
+      if (Synth._song.length > 0) {
+        const data = Synth._song.pop();
+        [note, duration] = data.split(':');
+        duration = parseInt(duration, 10);
+      }
+
+      if (note === 'T') {
+        Synth.tempo = duration;
+        continue;
+      }
+
+      // Tempo is in quarter notes per minute and there are sixty seconds in a
+      // minute. So the length of a quarter note in seconds is `60 / tempo`.
+      // `duration` is 1 for a whole note, 2 for a half, 4 for a quarter, etc.
+      // There are four quarter notes in a whole note, so the length of this note
+      // is `(4 / duration) * (60 / tempo)` seconds.
+      duration = (4 / duration) * (60 / Synth.tempo);
+
+      if (note !== 'R') {
+        const hertz = Note.frequency(note);
+        Synth.piano(hertz, sustain, duration, Synth._note);
+      }
+
+      Synth.measure = Synth.measure.concat(note).slice(-4);
+
+      Synth._note += duration;
     }
 
-    let note = PRNG.pick(notes);
-
-    if (Synth._song.length > 0) {
-      const data = Synth._song.pop();
-      [note, duration] = data.split(':');
-      duration = parseInt(duration, 10);
-    }
-
-    if (note === 'T') {
-      Synth.tempo = duration;
-      continue;
-    }
-
-    // Tempo is in quarter notes per minute and there are sixty seconds in a
-    // minute. So the length of a quarter note in seconds is `60 / tempo`.
-    // `duration` is 1 for a whole note, 2 for a half, 4 for a quarter, etc.
-    // There are four quarter notes in a whole note, so the length of this note
-    // is `(4 / duration) * (60 / tempo)` seconds.
-    duration = (4 / duration) * (60 / Synth.tempo);
-
-    if (note !== 'R') {
-      const hertz = Note.frequency(note);
-      Synth.piano(hertz, sustain, duration, Synth._time);
-    }
-
-    Synth._time += duration;
-
-    Synth.measure = Synth.measure.concat(note).slice(-4);
 
     if (!Synth.rules.includes('rhythm')) {
       break;
     }
+
+    Synth._time += interval;
   }
 
   let html = '';
