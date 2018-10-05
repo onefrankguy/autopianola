@@ -369,10 +369,10 @@ Synth.interpolate = (root, type, played, length) => {
 Synth.schedule = () => {
   const $ = window.jQuery;
 
-  let notes = ['C4'];
+  let notes = [Synth.root];
 
   if (Synth.rules.includes('palette')) {
-    notes = Scale.notes('C4', 'ahava-raba', 'up');
+    notes = Scale.notes(Synth.root, Synth.scale, 'up');
   }
 
   if (Synth.rules.includes('interpolate')) {
