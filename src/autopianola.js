@@ -245,8 +245,8 @@ Synth.MAX_DECAY = 60;
 Synth.MIN_RELEASE = 0.001;
 Synth.MAX_RELEASE = 60;
 
-Synth.play = (hertz, attack, decay, sustain, hold, release, time) => {
-  const osc = Audio.oscillator(hertz, 'sine');
+Synth.play = (hertz, attack, decay, sustain, hold, release, time, type) => {
+  const osc = Audio.oscillator(hertz, type);
   const gain = Audio.gain();
 
   osc.connect(gain);
@@ -283,7 +283,7 @@ Synth.flute = (hertz, sustain, duration, time) => {
   const release = duration * (1/8);
 
   const hold = duration - attack - decay - release;
-  Synth.play(hertz, attack, decay, sustain, hold, release, time);
+  Synth.play(hertz, attack, decay, sustain, hold, release, time, 'sine');
 };
 
 Synth.strings = (hertz, sustain, duration, time) => {
@@ -293,7 +293,7 @@ Synth.strings = (hertz, sustain, duration, time) => {
   const release = duration * (1/32);
 
   const hold = duration - attack - decay - release;
-  Synth.play(hertz, attack, decay, sustain, hold, release, time);
+  Synth.play(hertz, attack, decay, sustain, hold, release, time, 'sine');
 };
 
 Synth.piano = (hertz, sustain, duration, time) => {
@@ -303,7 +303,7 @@ Synth.piano = (hertz, sustain, duration, time) => {
   const release = duration * (1/2);
 
   const hold = duration - attack - decay - release;
-  Synth.play(hertz, attack, decay, sustain, hold, release, time);
+  Synth.play(hertz, attack, decay, sustain, hold, release, time, 'sine');
 };
 
 Synth.percussion = (hertz, sustain, duration, time) => {
@@ -313,7 +313,23 @@ Synth.percussion = (hertz, sustain, duration, time) => {
   const release = 0;
 
   const hold = duration - attack - decay - release;
-  Synth.play(hertz, attack, decay, 0, hold, release, time);
+  Synth.play(hertz, attack, decay, 0, hold, release, time, 'sine');
+};
+
+// The kick drum sound comes from Aqilah Misuary's article on synthesising
+// sounds with the Web Audio API.
+//
+// https://sonoport.github.io/synthesising-sounds-webaudio.html
+
+Synth.kick = (duration, time) => {
+  const attack = 0;
+  const decay = duration * 2;
+  const sustain = 0;
+  const release = duration - decay;
+
+  const hold = duration - attack - decay - release;
+  Synth.play(Note.frequency('B2'), attack, decay, sustain, hold, release, time, 'sine');
+  Synth.play(Note.frequency('G#1'), attack, decay, sustain, hold, release, time, 'triangle');
 };
 
 Synth._time = 0;
@@ -456,9 +472,7 @@ Synth.schedule = () => {
 
       if (Synth.rules.includes('bass')) {
         if (Synth._tick === 1 || Synth._tick === 3) {
-          const [bass] = Scale.notes(Synth.root, Synth.style, 'down').reverse();
-          const hertz = Note.frequency(bass);
-          Synth.percussion(hertz, 0, duration, Synth._beat);
+          Synth.kick(duration, Synth._beat);
         }
       }
 
@@ -572,7 +586,7 @@ window.onload = () => {
   const $ = window.jQuery;
 
   $('#play').click(() => {
-    Synth.play(Note.frequency('C0'), 1/32, 1/8, 0, 1/8, 0, Audio.now());
+    Synth.play(Note.frequency('C0'), 1/32, 1/8, 0, 1/8, 0, Audio.now(), 'sine');
     controls.playing = !controls.playing;
     Renderer.invalidate(controls);
   });
