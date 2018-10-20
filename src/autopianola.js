@@ -332,12 +332,61 @@ Synth.kick = (duration, time) => {
   Synth.play(Note.frequency('G#1'), attack, decay, sustain, hold, release, time, 'triangle');
 };
 
+// This implementation of Bjorklund's algorithm is based on Brian House's work.
+// https://github.com/brianhouse/bjorklund
+
+Synth.bjorklund = (pulses, steps) => {
+  const pattern = [];
+  const counts = [];
+  const remainders = [];
+  remainders.push(pulses);
+
+  let divisor = steps - pulses;
+  let level = 0;
+
+  while (true) {
+    counts.push(Math.floor(divisor / remainders[level]));
+    remainders.push(divisor % remainders[level]);
+    divisor = remainders[level];
+    level += 1;
+    if (remainders[level] <= 1) {
+      break;
+    }
+  }
+
+  counts.push(divisor);
+
+  const build = (lvl) => {
+    if (lvl === -1) {
+      pattern.push('.');
+    } else if (lvl === -2) {
+      pattern.push('x');
+    } else if (lvl > -1) {
+      for (let i = 0; i < counts[lvl]; i += 1) {
+        build(lvl - 1);
+      }
+      if (remainders[lvl] !== 0) {
+        build(lvl - 2);
+      }
+    }
+  };
+
+  build(level);
+
+  const i = pattern.indexOf('x');
+  const first = pattern.slice(i);
+  const rest = pattern.slice(0, i);
+  return first.concat(rest);
+};
+
 Synth._time = 0;
 Synth._note = 0;
 Synth._beat = 0;
 Synth._tick = 0;
 Synth._song = [];
-Synth.tempo = 240; // quarter notes per minute
+Synth._kick = [];
+Synth.tempo = 120; // quarter notes per minute
+Synth.length = 8; // default note type, 1 = whole, 2 = half, 4 = quarter, etc.
 Synth.measure = [];
 Synth.root = 'D4';
 Synth.scale = 'ahava-raba';
@@ -414,7 +463,7 @@ Synth.schedule = () => {
         action = PRNG.pick(['skip', 'combine', 'split']);
       }
 
-      let duration = 4;
+      let duration = Synth.length;
 
       if (action === 'combine') {
         if (length + (duration / 2) <= measures) {
@@ -466,12 +515,17 @@ Synth.schedule = () => {
 
   while (Synth._time < Audio.now() + lookahead) {
     if (Synth._beat < Synth._time + interval) {
-      const duration = 60 / Synth.tempo;
+      const duration = (4 / Synth.length) * (60 / Synth.tempo);
 
       Synth._tick = (Synth._tick + 1) % 4;
 
       if (Synth.rules.includes('bass')) {
-        if (Synth._tick === 1 || Synth._tick === 3) {
+        if (Synth._kick.length <= 0) {
+          Synth._kick = Synth.bjorklund(3, 7);
+          Synth._kick.reverse();
+        }
+
+        if (Synth._kick.pop() === 'x') {
           Synth.kick(duration, Synth._beat);
         }
       }
