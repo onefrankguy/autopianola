@@ -506,44 +506,25 @@ Synth.schedule = () => {
   const lookahead = 0.1;
   const interval = 0.025;
 
-  if (Math.abs(now - Synth._time) > 1) {
+  if (Synth._time <= 0 || Math.abs(now - Synth._time) > 1) {
     Synth._time = now;
     Synth._note = now;
     Synth._beat = now;
     Synth._tick = 0;
   }
 
+  if (Synth._kick.length <= 0) {
+    Synth._kick = Synth.bjorklund(3, Synth.length);
+  }
+
   while (Synth._time < Audio.now() + lookahead) {
-    if (Synth._beat < Synth._time + interval) {
-      const duration = (4 / Synth.length) * (60 / Synth.tempo);
-
-      Synth._tick = (Synth._tick + 1) % 4;
-
-      if (Synth.rules.includes('bass')) {
-        if (Synth._kick.length <= 0) {
-          Synth._kick = Synth.bjorklund(3, 7);
-          Synth._kick.reverse();
-        }
-
-        if (Synth._kick.pop() === 'x') {
-          Synth.kick(duration, Synth._beat);
-        }
-      }
-
-      Synth._beat += duration;
-    }
-
     if (Synth._note < Synth._time + interval) {
-      let duration = 4;
+      let duration = Synth.length;
       let sustain = 1/2;
 
       if (Synth.rules.includes('emphasis')) {
-        if (Synth._tick === 1) {
+        if (Synth._kick[Synth._tick] === 'x') {
           sustain = 1;
-        }
-
-        if (Synth._tick === 3) {
-          sustain = 3/4;
         }
       }
 
@@ -575,6 +556,20 @@ Synth.schedule = () => {
       Synth.measure = Synth.measure.concat(note).slice(-4);
 
       Synth._note += duration;
+    }
+
+    if (Synth._beat < Synth._time + interval) {
+      const duration = (4 / Synth.length) * (60 / Synth.tempo);
+
+      if (Synth.rules.includes('bass')) {
+        if (Synth._kick[Synth._tick] === 'x') {
+          Synth.kick(duration, Synth._beat);
+        }
+      }
+
+      Synth._beat += duration;
+
+      Synth._tick = (Synth._tick + 1) % Synth.length;
     }
 
 
