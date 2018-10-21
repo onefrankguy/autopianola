@@ -236,6 +236,36 @@ Scale.notes = (root, type, direction) => {
   return notes;
 };
 
+const Chord = {};
+
+Chord.notes = (root, type) => {
+  const sharps = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+  const flats = ['C', 'Db', 'D', 'Eb', 'E', 'F', 'Gb', 'G', 'Ab', 'A', 'Bb', 'B'];
+
+  const name = root.slice(0, 1).toUpperCase();
+  let index = sharps.indexOf(name);
+
+  const adjust = root.slice(1, 2).toLowerCase();
+  if (adjust === '#') {
+    index = sharps.indexOf(name + adjust);
+  }
+  if (adjust === 'b') {
+    index = flats.indexOf(name + adjust);
+  }
+
+  // Major
+  let intervals = [4, 7];
+
+  // Minor
+  if (type === 'minor') {
+    intervals = [3, 7];
+  }
+
+  const octave = parseInt(root.slice(-1), 10);
+
+  return Scale.up(intervals, index, octave);
+};
+
 const Synth = {};
 
 Synth.MIN_ATTACK = 0.001;
@@ -400,6 +430,7 @@ Synth.rules = [
   'dynamics',
   'spaces',
   'bass',
+  'harmonies',
   // 'song',
 ];
 
@@ -466,7 +497,7 @@ Synth.schedule = () => {
       let duration = Synth.length;
 
       if (action === 'combine') {
-        if (length + (duration / 2) <= measures) {
+        if (length + (1 / (duration / 2)) <= measures) {
           duration /= 2;
         }
       }
@@ -474,8 +505,10 @@ Synth.schedule = () => {
       let ticks = 1;
 
       if (action === 'split') {
-        duration *= 2;
-        ticks = 2;
+        if (length + (1 / (duration * 2)) <= measures) {
+          duration *= 2;
+          ticks = 2;
+        }
       }
 
       for (let i = 0; i < ticks; i += 1) {
@@ -549,11 +582,19 @@ Synth.schedule = () => {
       duration = (4 / duration) * (60 / Synth.tempo);
 
       if (note !== 'R') {
-        const hertz = Note.frequency(note);
+        let hertz = Note.frequency(note);
         Synth.piano(hertz, sustain, duration, Synth._note);
+
+        if (Synth.rules.includes('harmonies')) {
+          const chord = Chord.notes(note, 'major');
+          chord.forEach((note) => {
+            hertz = Note.frequency(note);
+            Synth.piano(hertz, sustain / 2, duration, Synth._note);
+          });
+        }
       }
 
-      Synth.measure = Synth.measure.concat(note).slice(-4);
+      Synth.measure = Synth.measure.concat(note).slice(-Synth.length);
 
       Synth._note += duration;
     }
@@ -581,7 +622,7 @@ Synth.schedule = () => {
   }
 
   let html = '';
-  Synth.measure.forEach((note) => {
+  Synth.measure.slice(-4).forEach((note) => {
     html += `<div>${note}</div>`;
   });
   $('#measure').html(html);
