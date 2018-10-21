@@ -41,7 +41,6 @@ Audio.volume = (value) => {
     Audio._volume.connect(Audio.ctx().destination);
   }
 
-
   if (value !== undefined) {
     Audio._volume.gain.setValueAtTime(Math.clamp(value, Audio.MIN_GAIN, Audio.MAX_GAIN), Audio.now());
   }
@@ -303,7 +302,7 @@ Synth.play = (hertz, attack, decay, sustain, hold, release, time, type) => {
 
   // Play
   osc.start(t);
-  osc.stop(t + a + d + h + r);
+  osc.stop(t + a + d + h + r + 1);
 };
 
 Synth.flute = (hertz, sustain, duration, time) => {
@@ -425,12 +424,12 @@ Synth.scale = 'major';
 Synth.rules = [
   'rhythm',
   'emphasis',
-  // 'palette',
-  // 'interpolate',
-  // 'groups',
-  // 'dynamics',
-  // 'spaces',
-  // 'bass',
+  'palette',
+  'interpolate',
+  'groups',
+  'dynamics',
+  'spaces',
+  'bass',
   // 'harmonies',
   // 'song',
 ];
@@ -577,7 +576,7 @@ Synth.schedule = () => {
   }
 
   if (Synth._kick.length <= 0) {
-    Synth._kick = Synth.bjorklund(3, Synth.length);
+    Synth._kick = Synth.bjorklund(2, 5);
   }
 
   while (Synth._time < Audio.now() + lookahead) {
@@ -632,7 +631,17 @@ Synth.schedule = () => {
 
       if (Synth.rules.includes('bass')) {
         if (Synth._kick[Synth._tick] === 'x') {
-          Synth.kick(duration, Synth._beat);
+          let sustain = Synth.emphasis();
+
+          if (Synth.rules.includes('emphasis')) {
+            sustain = Synth.emphasis(Synth.length, Synth._tick);
+          }
+
+          sustain /= 2;
+
+          const bass = Scale.notes(Synth.root, Synth.scale, 'down')[3];
+          const hertz = Note.frequency(bass);
+          Synth.piano(hertz, sustain, duration, Synth._beat);
         }
       }
 
