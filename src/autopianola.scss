@@ -40,6 +40,10 @@ fieldset {
 /* KEYBOARD */
 $white-width: 4rem;
 $black-width: (1.5 / 2) * $white-width;
+$white: rgba(220, 220, 220, 1);
+$black: rgba(5, 7, 9, 1);
+$gray: rgba(85, 85, 85, 1);
+$shadow: rgba(0, 0, 0, 0.3);
 
 .keyboard {
   position: relative;
@@ -62,16 +66,6 @@ $black-width: (1.5 / 2) * $white-width;
   -moz-appearance: none;
 }
 
-.keyboard > button:hover {
-}
-
-.keyboard > button:focus {
-  outline-offset: -4px;
-}
-
-.keyboard > button:active {
-}
-
 /* https://codepen.io/garypaul/pen/jgKqc */
 .keyboard > .white,
 .keyboard > .black {
@@ -79,29 +73,26 @@ $black-width: (1.5 / 2) * $white-width;
   font-size: 1.6rem;
   line-height: 1.6rem;
 
-  transition: all 0.1s ease-in-out;
-
-  background: linear-gradient(to bottom, #c0c1bd, #f0f0f0 10%, #faf0e6);
-  border: 1px solid #ccc;
+  border: 1px solid $gray;
   border-radius: 0 0 5px 5px;
-  box-shadow: 0 5px 5px #aaa;
+  box-shadow: 0 5px 5px $shadow;
 
   position: relative;
 
   color: transparent;
 
   &:hover {
-    color: #c0c1bd;
+    color: $gray;
   }
 
   &:focus {
-    color: #c0c1bd;
+    color: $gray;
+    outline-offset: -4px;
   }
 
   &:active {
+    color: $gray;
     box-shadow: none;
-    top: 5px;
-    color: #333;
   }
 }
 
@@ -122,26 +113,19 @@ $black-width: (1.5 / 2) * $white-width;
   top: 0;
   margin-left: -($black-width / 2);
 
-  background: #171c1a;
-  box-shadow: 0 3px 5px #ccc, inset 0px 0px 0px 1px rgba(gainsboro, 0.2);
-  border-radius: 0 0 2px 2px;
-  border-width: 0 6px 12px;
-  border-color: #000;
-  border-bottom-color: #424546;
+  background: $black;
 
   &:hover {
-    color: gainsboro;
+    color: $white;
   }
 
   &:focus {
-    color: gainsboro;
+    color: $white;
     outline-offset: 0;
   }
 
   &:active {
-    border-bottom-width: 8px;
-    padding-top: 135px;
-    color: white;
+    color: $white;
   }
 }
 
