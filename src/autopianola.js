@@ -499,6 +499,11 @@ Synth.schedule = () => {
   const $ = window.jQuery;
 
   if (Synth._properties !== undefined) {
+    if (Synth._properties.root !== undefined) {
+      Synth.root = Synth._properties.root;
+      Synth._song = [];
+    }
+
     const length = parseInt(Synth._properties.length, 10);
     if (!Number.isNaN(length)) {
       Synth.length = length;
@@ -721,16 +726,11 @@ const Renderer = {};
 
 Renderer.render = (controls) => {
   const $ = window.jQuery;
-  const play = $('#play');
 
   if (controls.playing) {
     Synth.on();
-    play.addClass('pause');
-    play.removeClass('play');
   } else {
     Synth.off();
-    play.addClass('play');
-    play.removeClass('pause');
   }
 };
 
@@ -745,10 +745,34 @@ window.onload = () => {
 
   const $ = window.jQuery;
 
-  $('#play').click(() => {
-    Synth.play(Note.frequency('C0'), 1/32, 1/8, 0, 1/8, 0, Audio.now(), 'sine');
-    controls.playing = !controls.playing;
-    Renderer.invalidate(controls);
+  const keys = ['c', 'cs', 'd', 'ds', 'e', 'f', 'fs', 'g', 'gs', 'a', 'as', 'b'];
+  let html = '';
+  keys.forEach((id) => {
+    let [key, klass] = id.split('');
+    if (klass === 's') {
+      key = `${key}#`;
+      klass = 'black';
+    } else {
+      klass = 'white';
+    }
+    html += `<button id="key-${id}" class="${klass}">${key}</button>`;
+  });
+  $('#keyboard').html(html);
+
+  keys.forEach((id) => {
+    $(`#key-${id}`).click(() => {
+      let [note, accent] = id.split('');
+      if (accent === 's') {
+        note = `${note}#`;
+      }
+      note = `${note}4`;
+      const hertz = Note.frequency(note);
+      Synth.piano(hertz, 1/2, 1/4, Audio.now());
+      Synth.invalidate({root: note});
+
+      controls.playing = true;
+      Renderer.invalidate(controls);
+    });
   });
 
   $('#bpm-range').change((range) => {

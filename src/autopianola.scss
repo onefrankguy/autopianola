@@ -33,14 +33,17 @@ fieldset {
   /* Usable area on an iPhone 4 is 320x372 pixels */
   width: 32rem;
   margin: 0 auto;
+  padding: 5px;
   overflow: hidden;
 }
 
 /* CONTROLS */
-.button {
+.play, .pause {
   display: block;
   width: $button-size;
   height: $button-size;
+  border: none;
+  margin: 0.5rem;
 }
 
 .play {
@@ -49,6 +52,114 @@ fieldset {
 
 .pause {
   background: url('pause-button.svg');
+}
+
+/* KEYBOARD */
+$white-width: 4rem;
+$black-width: (1.5 / 2) * $white-width;
+
+.keyboard {
+  position: relative;
+  display: inline-block;
+  width: 100%;
+  padding-top: 0;
+  border: none;
+  text-align: center;
+}
+
+.keyboard > button {
+  display: inline-block;
+  border: none;
+  padding: 0;
+  margin: 0;
+  text-decoration: none;
+  cursor: pointer;
+  text-align: center;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+}
+
+.keyboard > button:hover {
+}
+
+.keyboard > button:focus {
+  outline-offset: -4px;
+}
+
+.keyboard > button:active {
+}
+
+/* https://codepen.io/garypaul/pen/jgKqc */
+.keyboard > .white,
+.keyboard > .black {
+  text-transform: uppercase;
+  font-size: 1.6rem;
+  line-height: 1.6rem;
+
+  transition: all 0.1s ease-in-out;
+
+  background: linear-gradient(to bottom, #c0c1bd, #f0f0f0 10%, #faf0e6);
+  border: 1px solid #ccc;
+  border-radius: 0 0 5px 5px;
+  box-shadow: 0 5px 5px #aaa;
+
+  position: relative;
+
+  color: transparent;
+
+  &:hover {
+    color: #c0c1bd;
+  }
+
+  &:focus {
+    color: #c0c1bd;
+  }
+
+  &:active {
+    box-shadow: none;
+    top: 5px;
+    color: #333;
+  }
+}
+
+.keyboard > .white {
+  z-index: 1;
+  width: $white-width;
+  padding: 14rem 0 3rem;
+}
+
+.keyboard > .black {
+  z-index: 2;
+  width: $black-width;
+  padding: 9rem 0 1rem;
+
+  font-size: 1.2rem;
+
+  position: absolute;
+  top: 0;
+  margin-left: -($black-width / 2);
+
+  background: #171c1a;
+  box-shadow: 0 3px 5px #ccc, inset 0px 0px 0px 1px rgba(gainsboro, 0.2);
+  border-radius: 0 0 2px 2px;
+  border-width: 0 6px 12px;
+  border-color: #000;
+  border-bottom-color: #424546;
+
+  &:hover {
+    color: gainsboro;
+  }
+
+  &:focus {
+    color: gainsboro;
+    outline-offset: 0;
+  }
+
+  &:active {
+    border-bottom-width: 8px;
+    padding-top: 135px;
+    color: white;
+  }
 }
 
 /* MEASURE */
