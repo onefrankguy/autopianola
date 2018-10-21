@@ -57,6 +57,28 @@
     return this;
   };
 
+  Fn.prototype.val = function val() {
+    if (this.element) {
+      return this.element.value;
+    }
+
+    return undefined;
+  };
+
+  Fn.prototype.change = function change(handler) {
+    const that = this;
+
+    if (this.element) {
+      this.element.oninput = function onchange(changeEvent) {
+        if (handler) {
+          handler(that, changeEvent);
+        }
+      }
+    }
+
+    return that;
+  };
+
   Fn.prototype.click = function click(start, end) {
     const that = this;
 

@@ -491,8 +491,22 @@ Synth.emphasis = (beats, tick) => {
   return weak;
 };
 
+Synth.invalidate = (properties) => {
+  Synth._properties = Object.assign({}, Synth._properties || {}, properties);
+};
+
 Synth.schedule = () => {
   const $ = window.jQuery;
+
+  if (Synth._properties !== undefined) {
+    const length = parseInt(Synth._properties.length, 10);
+    if (!Number.isNaN(length)) {
+      Synth.length = length;
+      Synth._song = [];
+    }
+
+    Synth._properties = undefined;
+  }
 
   let notes = [Synth.root];
 
@@ -716,5 +730,11 @@ window.onload = () => {
     Synth.play(Note.frequency('C0'), 1/32, 1/8, 0, 1/8, 0, Audio.now(), 'sine');
     controls.playing = !controls.playing;
     Renderer.invalidate(controls);
+  });
+
+  $('#bpm-range').change((range) => {
+    const value = range.val();
+    $('#bpm-value').html(value);
+    Synth.invalidate({length: value});
   });
 };
