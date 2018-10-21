@@ -416,21 +416,22 @@ Synth._tick = 0;
 Synth._song = [];
 Synth._kick = [];
 Synth.tempo = 120; // quarter notes per minute
-Synth.length = 8; // default note type, 1 = whole, 2 = half, 4 = quarter, etc.
+Synth.length = 4; // number of beats in each measure
+Synth.note = 4; // note that gets one beat, 1 = whole, 2 = half, 4 = quarter, etc.
 Synth.measure = [];
-Synth.root = 'D4';
-Synth.scale = 'ahava-raba';
+Synth.root = 'C4';
+Synth.scale = 'major';
 
 Synth.rules = [
   'rhythm',
   'emphasis',
-  'palette',
-  'interpolate',
-  'groups',
-  'dynamics',
-  'spaces',
-  'bass',
-  'harmonies',
+  // 'palette',
+  // 'interpolate',
+  // 'groups',
+  // 'dynamics',
+  // 'spaces',
+  // 'bass',
+  // 'harmonies',
   // 'song',
 ];
 
@@ -460,6 +461,35 @@ Synth.interpolate = (root, type, played, length) => {
   }
 
   return notes.slice(index, index + length);
+};
+
+Synth.emphasis = (beats, tick) => {
+  const strongest = 1;
+  const strong = 3/4;
+  const weak = 1/2;
+
+  if (beats === 4) {
+    if (tick === 0) {
+      return strongest;
+    }
+    if (tick === 2) {
+      return strong;
+    }
+  }
+
+  if (beats === 3) {
+    if (tick === 0) {
+      return strong;
+    }
+  }
+
+  if (beats === 2) {
+    if (tick === 0) {
+      return strong;
+    }
+  }
+
+  return weak;
 };
 
 Synth.schedule = () => {
@@ -494,7 +524,7 @@ Synth.schedule = () => {
         action = PRNG.pick(['skip', 'combine', 'split']);
       }
 
-      let duration = Synth.length;
+      let duration = Synth.note;
 
       if (action === 'combine') {
         if (length + (1 / (duration / 2)) <= measures) {
@@ -552,13 +582,11 @@ Synth.schedule = () => {
 
   while (Synth._time < Audio.now() + lookahead) {
     if (Synth._note < Synth._time + interval) {
-      let duration = Synth.length;
-      let sustain = 1/2;
+      let duration = Synth.note;
+      let sustain = Synth.emphasis();
 
       if (Synth.rules.includes('emphasis')) {
-        if (Synth._kick[Synth._tick] === 'x') {
-          sustain = 1;
-        }
+        sustain = Synth.emphasis(Synth.length, Synth._tick);
       }
 
       let note = PRNG.pick(notes);
@@ -600,7 +628,7 @@ Synth.schedule = () => {
     }
 
     if (Synth._beat < Synth._time + interval) {
-      const duration = (4 / Synth.length) * (60 / Synth.tempo);
+      const duration = (4 / Synth.note) * (60 / Synth.tempo);
 
       if (Synth.rules.includes('bass')) {
         if (Synth._kick[Synth._tick] === 'x') {
@@ -622,7 +650,7 @@ Synth.schedule = () => {
   }
 
   let html = '';
-  Synth.measure.slice(-4).forEach((note) => {
+  Synth.measure.slice(-Synth.length).forEach((note) => {
     html += `<div>${note}</div>`;
   });
   $('#measure').html(html);
