@@ -37,23 +37,6 @@ fieldset {
   overflow: hidden;
 }
 
-/* CONTROLS */
-.play, .pause {
-  display: block;
-  width: $button-size;
-  height: $button-size;
-  border: none;
-  margin: 0.5rem;
-}
-
-.play {
-  background: url('play-button.svg');
-}
-
-.pause {
-  background: url('pause-button.svg');
-}
-
 /* KEYBOARD */
 $white-width: 4rem;
 $black-width: (1.5 / 2) * $white-width;
@@ -174,6 +157,7 @@ $black-width: (1.5 / 2) * $white-width;
   align-items: center;
   width: $button-size;
   height: $button-size;
+  text-transform: uppercase;
 }
 
 /* UTILITY */

@@ -14,14 +14,25 @@
     <div id="measure" class="measure"><div></div></div>
     <fieldset id="keyboard" class="keyboard"></fieldset>
     <fieldset>
-      <label for="bpm">Beats</label>
-      <input type="range" id="bpm-range" name="bpm" min="2" max="4" step="1" list="bpm-ticks" value="4" />
-      <output for="bpm" id="bpm-value">4</output>
-      <datalist id="bpm-ticks">
-        <option value="2" label="2">
-        <option value="3">
-        <option value="4" label="4">
-      </datalist>
+      <div>
+        <label for="bpm-range">Beats</label>
+        <input type="range" id="bpm-range" name="bpm" min="2" max="4" step="1" list="bpm-ticks" value="4" />
+        <output for="bpm-range" id="bpm-value">4</output>
+        <datalist id="bpm-ticks">
+          <option value="2" label="2">
+          <option value="3">
+          <option value="4" label="4">
+        </datalist>
+      </div>
+      <div>
+        <label for="bpm">Tempo</label>
+        <input type="range" id="tempo-range" name="tempo" min="32" max="256" step="1" list="tempo-ticks" value="120" />
+        <output for="tempo-range" id="tempo-value">120</output>
+        <datalist id="tempo-ticks">
+          <option value="32" label="32">
+          <option value="256" label="256">
+        </datalist>
+      </div>
     </fieldset>
 
     <fieldset>

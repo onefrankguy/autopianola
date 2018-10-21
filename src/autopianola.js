@@ -510,6 +510,11 @@ Synth.schedule = () => {
       Synth._song = [];
     }
 
+    const tempo = parseInt(Synth._properties.tempo, 10);
+    if (!Number.isNaN(tempo)) {
+      Synth.tempo = tempo;
+    }
+
     const rule = (name, enabled) => {
       if (enabled === true && !Synth.rules.includes(name)) {
         Synth.rules.push(name);
@@ -779,6 +784,12 @@ window.onload = () => {
     const value = range.val();
     $('#bpm-value').html(value);
     Synth.invalidate({length: value});
+  });
+
+  $('#tempo-range').change((range) => {
+    const value = range.val();
+    $('#tempo-value').html(value);
+    Synth.invalidate({tempo: value});
   });
 
   $('#emphasis-toggle').change((toggle) => {
