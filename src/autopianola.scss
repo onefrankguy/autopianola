@@ -23,8 +23,8 @@ input[type=checkbox] {
 }
 
 fieldset {
-  margin-top: 1rem;
-  padding: 1rem;
+  margin-top: 1.6rem;
+  padding: 0.8rem;
 }
 
 /* WORLD */
@@ -152,6 +152,33 @@ $shadow: rgba(0, 0, 0, 0.3);
   -ms-user-select: none;
   -khtml-user-select: none;
   -webkit-touch-callout: none;
+}
+
+/* COLOPHON */
+.colophon {
+  font-size: .9rem;
+  line-height: .9rem;
+  text-align: right;
+  width: 100%;
+  margin-top: 3.2rem;
+}
+
+.colophon > a:hover {
+  cursor: auto;
+  text-decoration: underline;
+}
+
+abbr[title="and"] {
+  font-family: 'Adobe Caslon Pro', 'Baskerville', 'Goudy Old Style', 'Palatino',
+  'Palatino Linotype', 'Book Antiqua', 'Georgia', 'Times New Roman', 'Times', serif;
+  font-style: italic;
+  text-decoration: none;
+  font-size: 110%;
+  cursor: auto;
+  /* Prevents `abbr` affecting the `line-height`. */
+  line-height: 0;
+  position: relative;
+  vertical-align: baseline;
 }
 
 /* SCREEN */
