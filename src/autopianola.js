@@ -505,13 +505,24 @@ Synth.schedule = () => {
       Synth._song = [];
     }
 
-    const bass = Synth._properties.bass;
-    if (bass === true && !Synth.rules.includes('bass')) {
-      Synth.rules.push('bass');
-    }
-    if (bass === false && Synth.rules.includes('bass')) {
-      Synth.rules = Synth.rules.filter(rule => rule !== 'bass');
-    }
+    const rule = (name, enabled) => {
+      if (enabled === true && !Synth.rules.includes(name)) {
+        Synth.rules.push(name);
+        Synth._song = [];
+      }
+      if (enabled === false && Synth.rules.includes(name)) {
+        Synth.rules = Synth.rules.filter(rule => rule !== name);
+        Synth._song = [];
+      }
+    };
+
+    rule('emphasis', Synth._properties.emphasis);
+    rule('palette', Synth._properties.palette);
+    rule('interpolate', Synth._properties.interpolate);
+    rule('groups', Synth._properties.groups);
+    rule('dynamics', Synth._properties.dynamics);
+    rule('spaces', Synth._properties.spaces);
+    rule('bass', Synth._properties.bass);
 
     Synth._properties = undefined;
   }
@@ -520,10 +531,10 @@ Synth.schedule = () => {
 
   if (Synth.rules.includes('palette')) {
     notes = Scale.notes(Synth.root, Synth.scale, 'up');
-  }
 
-  if (Synth.rules.includes('interpolate')) {
-    notes = Synth.interpolate(Synth.root, Synth.scale, Synth.measure, 7);
+    if (Synth.rules.includes('interpolate')) {
+      notes = Synth.interpolate(Synth.root, Synth.scale, Synth.measure, 7);
+    }
   }
 
   if (Synth.rules.includes('song') && Synth._song.length <= 0) {
@@ -744,6 +755,36 @@ window.onload = () => {
     const value = range.val();
     $('#bpm-value').html(value);
     Synth.invalidate({length: value});
+  });
+
+  $('#emphasis-toggle').change((toggle) => {
+    const value = toggle.unwrap().checked;
+    Synth.invalidate({emphasis: value});
+  });
+
+  $('#palette-toggle').change((toggle) => {
+    const value = toggle.unwrap().checked;
+    Synth.invalidate({palette: value});
+  });
+
+  $('#interpolate-toggle').change((toggle) => {
+    const value = toggle.unwrap().checked;
+    Synth.invalidate({interpolate: value});
+  });
+
+  $('#groups-toggle').change((toggle) => {
+    const value = toggle.unwrap().checked;
+    Synth.invalidate({groups: value});
+  });
+
+  $('#dynamics-toggle').change((toggle) => {
+    const value = toggle.unwrap().checked;
+    Synth.invalidate({dynamics: value});
+  });
+
+  $('#spaces-toggle').change((toggle) => {
+    const value = toggle.unwrap().checked;
+    Synth.invalidate({spaces: value});
   });
 
   $('#bass-toggle').change((toggle) => {

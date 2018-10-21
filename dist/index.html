@@ -24,9 +24,36 @@
       </datalist>
     </fieldset>
 
-    <fieldset class="checkbox">
-      <input type="checkbox" id="bass-toggle" name="bass" checked />
-      <label for="bass-toggle">Bass</label>
+    <fieldset>
+      <legend>Rules</legend>
+      <div>
+        <input type="checkbox" id="emphasis-toggle" name="rules[]" checked />
+        <label for="emphasis-toggle">Emphasis</label>
+      </div>
+      <div>
+        <input type="checkbox" id="palette-toggle" name="rules[]" checked />
+        <label for="palette-toggle">Palette</label>
+      </div>
+      <div>
+        <input type="checkbox" id="interpolate-toggle" name="rules[]" checked />
+        <label for="interpolate-toggle">Interpolate</label>
+      </div>
+      <div>
+        <input type="checkbox" id="groups-toggle" name="rules[]" checked />
+        <label for="groups-toggle">Groups</label>
+      </div>
+      <div>
+        <input type="checkbox" id="dynamics-toggle" name="rules[]" checked />
+        <label for="dynamics-toggle">Dynamics</label>
+      </div>
+      <div>
+        <input type="checkbox" id="spaces-toggle" name="rules[]" checked />
+        <label for="spaces-toggle">Spaces</label>
+      </div>
+      <div>
+        <input type="checkbox" id="bass-toggle" name="rules[]" checked />
+        <label for="bass-toggle">Bass</label>
+      </div>
     </fieldset>
   </div>
   <script src="autopianola.js"></script>
