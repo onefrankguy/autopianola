@@ -40,7 +40,7 @@ fieldset {
 /* KEYBOARD */
 $white-width: 4rem;
 $black-width: (1.5 / 2) * $white-width;
-$white: rgba(220, 220, 220, 1);
+$white: rgba(255, 255, 255, 1);
 $black: rgba(5, 7, 9, 1);
 $gray: rgba(85, 85, 85, 1);
 $shadow: rgba(0, 0, 0, 0.3);
@@ -79,6 +79,7 @@ $shadow: rgba(0, 0, 0, 0.3);
 
   position: relative;
 
+  background: $white;
   color: transparent;
 
   &:hover {
