@@ -254,11 +254,11 @@ Chord.notes = (root, type) => {
   }
 
   // Major
-  let intervals = [4, 7];
+  let intervals = [4, 3];
 
   // Minor
   if (type === 'minor') {
-    intervals = [3, 7];
+    intervals = [3, 4];
   }
 
   const octave = parseInt(root.slice(-1), 10);
@@ -589,7 +589,7 @@ Synth.schedule = () => {
           const chord = Chord.notes(note, 'major');
           chord.forEach((note) => {
             hertz = Note.frequency(note);
-            Synth.piano(hertz, sustain / 2, duration, Synth._note);
+            Synth.piano(hertz, sustain / 2, duration * 1.5, Synth._note);
           });
         }
       }
