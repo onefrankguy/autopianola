@@ -121,6 +121,10 @@
     return that;
   };
 
+  Fn.prototype.unwrap = function unwrap() {
+    return this.element;
+  };
+
   function root(selector) {
     return new Fn(selector);
   }

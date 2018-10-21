@@ -505,6 +505,14 @@ Synth.schedule = () => {
       Synth._song = [];
     }
 
+    const bass = Synth._properties.bass;
+    if (bass === true && !Synth.rules.includes('bass')) {
+      Synth.rules.push('bass');
+    }
+    if (bass === false && Synth.rules.includes('bass')) {
+      Synth.rules = Synth.rules.filter(rule => rule !== 'bass');
+    }
+
     Synth._properties = undefined;
   }
 
@@ -736,5 +744,10 @@ window.onload = () => {
     const value = range.val();
     $('#bpm-value').html(value);
     Synth.invalidate({length: value});
+  });
+
+  $('#bass-toggle').change((toggle) => {
+    const value = toggle.unwrap().checked;
+    Synth.invalidate({bass: value});
   });
 };
