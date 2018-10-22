@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>Autopianola</title>
+  <title>Autopianola - a player piano that writes its own songs</title>
   <meta name="author" content="Frank Mitchell" />
   <meta name="viewport" content="width=device-width,user-scalable=no" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -28,13 +28,17 @@
         </datalist>
       </div>
       <div>
-        <label for="bpm">Tempo</label>
+        <label for="tempo-range">Tempo</label>
         <input type="range" id="tempo-range" name="tempo" min="32" max="256" step="1" list="tempo-ticks" value="120" />
         <output for="tempo-range" id="tempo-value">120</output>
         <datalist id="tempo-ticks">
           <option value="32" label="32">
           <option value="256" label="256">
         </datalist>
+      </div>
+      <div>
+        <label for="beat-choice">Beat</label>
+        <select id="beat-choice" class="beat-choice"></select>
       </div>
     </fieldset>
     <fieldset>

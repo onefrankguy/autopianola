@@ -417,8 +417,9 @@ Synth._kick = [];
 Synth.tempo = 120; // quarter notes per minute
 Synth.length = 4; // number of beats in each measure
 Synth.note = 4; // note that gets one beat, 1 = whole, 2 = half, 4 = quarter, etc.
+Synth.beat = '2,5';
 Synth.measure = [];
-Synth.root = 'C4';
+Synth.root = 'D4';
 Synth.scale = 'major';
 
 Synth.rules = [
@@ -513,6 +514,11 @@ Synth.schedule = () => {
     const tempo = parseInt(Synth._properties.tempo, 10);
     if (!Number.isNaN(tempo)) {
       Synth.tempo = tempo;
+    }
+
+    if (Synth._properties.beat !== undefined) {
+      Synth.beat = Synth._properties.beat;
+      Synth._kick = [];
     }
 
     const rule = (name, enabled) => {
@@ -619,7 +625,8 @@ Synth.schedule = () => {
   }
 
   if (Synth._kick.length <= 0) {
-    Synth._kick = Synth.bjorklund(2, 5);
+    const [pulses, steps] = Synth.beat.split(',');
+    Synth._kick = Synth.bjorklund(pulses, steps);
   }
 
   while (Synth._time < Audio.now() + lookahead) {
@@ -739,6 +746,37 @@ Renderer.render = (controls) => {
   }
 };
 
+Renderer.renderBeats = (limit) => {
+  limit = parseInt(limit, 10);
+
+  const beats = [
+    '2,5', '3,7', '4,9', '5,11', '5,16',
+    '2,3', '3,4', '3,5', '3,8', '4,7', '4,11', '5,6', '5,7', '5,9', '5,12', '7,8', '7,16', '11,24',
+    '5,8', '7,12', '9,16', '13,24',
+  ];
+  const patterns = beats.map((beat) => {
+    const [pulses, steps] = beat.split(',');
+    return Synth.bjorklund(pulses, steps).slice(0, limit).join('');
+  });
+
+  const unique = {};
+  for (let i = 0; i < patterns.length; i += 1) {
+    if (unique[patterns[i]] === undefined) {
+      unique[patterns[i]] = beats[i];
+    }
+  }
+
+  const $ = window.jQuery;
+
+  let html = '';
+  Object.keys(unique).forEach((pattern) => {
+    const beat = unique[pattern];
+    html += `<option value="${beat}">E(${beat})=[${pattern}]</option>`;
+  });
+
+  $('#beat-choice').html(html);
+};
+
 Renderer.invalidate = (controls) => {
   requestAnimationFrame(() => Renderer.render(controls));
 };
@@ -780,16 +818,24 @@ window.onload = () => {
     });
   });
 
+  Renderer.renderBeats(Synth.length);
+
   $('#bpm-range').change((range) => {
     const value = range.val();
     $('#bpm-value').html(value);
     Synth.invalidate({length: value});
+    Renderer.renderBeats(value);
   });
 
   $('#tempo-range').change((range) => {
     const value = range.val();
     $('#tempo-value').html(value);
     Synth.invalidate({tempo: value});
+  });
+
+  $('#beat-choice').change((choice) => {
+    const value = choice.val();
+    Synth.invalidate({beat: value});
   });
 
   $('#emphasis-toggle').change((toggle) => {
