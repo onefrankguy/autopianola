@@ -18,26 +18,25 @@
     <p>Enjoy the music!</p>
     <fieldset>
       <div>
-        <label for="bpm-range">Beats</label>
-        <input type="range" id="bpm-range" name="bpm" min="2" max="4" step="1" list="bpm-ticks" value="4" />
-        <output for="bpm-range" id="bpm-value">4</output>
-        <datalist id="bpm-ticks">
-          <option value="2" label="2">
-          <option value="3">
-          <option value="4" label="4">
-        </datalist>
-      </div>
-      <div>
         <label for="tempo-range">Tempo</label>
         <input type="range" id="tempo-range" name="tempo" min="32" max="256" step="1" list="tempo-ticks" value="120" />
-        <output for="tempo-range" id="tempo-value">120</output>
+        <span>q = <output for="tempo-range" id="tempo-value">120</output>
         <datalist id="tempo-ticks">
           <option value="32" label="32">
           <option value="256" label="256">
         </datalist>
       </div>
       <div>
-        <label for="beat-choice">Beat</label>
+        <label for="bpm-range">Beats per measure</label>
+        <input type="range" id="bpm-range" name="bpm" min="2" max="8" step="1" list="bpm-ticks" value="4" />
+        <output for="bpm-range" id="bpm-value">4</output>
+        <datalist id="bpm-ticks">
+          <option value="2" label="2">
+          <option value="8" label="8">
+        </datalist>
+      </div>
+      <div>
+        <label for="beat-choice">Beat pattern</label>
         <select id="beat-choice" class="beat-choice"></select>
       </div>
     </fieldset>

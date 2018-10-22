@@ -756,7 +756,11 @@ Renderer.renderBeats = (limit) => {
   ];
   const patterns = beats.map((beat) => {
     const [pulses, steps] = beat.split(',');
-    return Synth.bjorklund(pulses, steps).slice(0, limit).join('');
+    const pattern = Synth.bjorklund(pulses, steps).slice(0, limit);
+    while (pattern.length < limit) {
+      pattern.push('.');
+    }
+    return pattern.join('');
   });
 
   const unique = {};
